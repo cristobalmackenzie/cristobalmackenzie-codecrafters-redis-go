@@ -20,17 +20,17 @@ func main() {
 	}
 
 	reader := bufio.NewReader(conn)
-	// for {
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading from connection:", err.Error())
-		return
+	for {
+		message, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading from connection:", err.Error())
+			return
+		}
+
+		fmt.Println("Received:", message)
+
+		conn.Write([]byte("+PONG\r\n"))
 	}
-
-	fmt.Println("Received:", message)
-
-	conn.Write([]byte("+PONG\r\n"))
-	// }
 }
 
 // func handleConnection(conn net.Conn) {
