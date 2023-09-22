@@ -20,28 +20,30 @@ func main() {
 	}
 
 	reader := bufio.NewReader(conn)
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading from connection:", err.Error())
-		return
+	for {
+		message, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading from connection:", err.Error())
+			return
+		}
+
+		fmt.Println("Received:", message)
+
+		conn.Write([]byte("+PONG\r\n"))
 	}
-
-	fmt.Println("Received:", message)
-
-	conn.Write([]byte("+PONG\r\n"))
 }
 
-func handleConnection(conn net.Conn) {
-	defer conn.Close()
+// func handleConnection(conn net.Conn) {
+// 	defer conn.Close()
 
-	reader := bufio.NewReader(conn)
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading from connection:", err.Error())
-		return
-	}
+// 	reader := bufio.NewReader(conn)
+// 	message, err := reader.ReadString('\n')
+// 	if err != nil {
+// 		fmt.Println("Error reading from connection:", err.Error())
+// 		return
+// 	}
 
-	fmt.Println("Received:", message)
+// 	fmt.Println("Received:", message)
 
-	conn.Write([]byte("+PONG\r\n"))
-}
+// 	conn.Write([]byte("+PONG\r\n"))
+// }
