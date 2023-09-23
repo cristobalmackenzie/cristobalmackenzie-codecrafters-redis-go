@@ -15,37 +15,40 @@ func main() {
 	}
 	defer l.Close()
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			continue // instead of exiting, just handle the next connection
+		}
+
+		go handleConnection(conn)
 	}
+}
+
+func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
 	for {
-		// Read the array length (we expect *1 for a simple PING)
 		_, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection:", err.Error())
 			return
 		}
 
-		// Read the length of the command
 		_, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection:", err.Error())
 			return
 		}
 
-		// Read the actual command
 		_, err = reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection:", err.Error())
 			return
 		}
 
-		// assuming its a ping
 		conn.Write([]byte("+PONG\r\n"))
 	}
 }
