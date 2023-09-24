@@ -41,7 +41,7 @@ func handleConnection(conn net.Conn, rs *RedisStore) {
 		command, params, err := readCommand(reader)
 
 		if err != nil {
-			fmt.Println("Error reading from command:", err.Error())
+			// fmt.Println("Error reading from command:", err.Error())
 			return
 		}
 
@@ -51,7 +51,13 @@ func handleConnection(conn net.Conn, rs *RedisStore) {
 		} else if command == "echo" {
 			response = fmt.Sprintf("+%s\r\n", params[0])
 		} else if command == "set" {
-			rs.Set(params[0], params[1])
+			var px *int64
+			if len(params) == 4 && params[2] == "px" {
+				pxMillis, _ := strconv.Atoi(params[3])
+				pxMillis64 := int64(pxMillis)
+				px = &pxMillis64
+			}
+			rs.Set(params[0], params[1], px)
 		} else if command == "get" {
 			value, exists := rs.Get(params[0])
 			if exists {
