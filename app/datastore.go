@@ -39,12 +39,13 @@ func (rs *RedisStore) Get(key string) (string, bool) {
 }
 
 func newRedisValue(value string, px *int64) redisValue {
-    var expirationTime int64
+    var expirationTime *int64
     if px != nil {
         currentTimeMillis := time.Now().UnixNano() / int64(time.Millisecond)
-        expirationTime = (*px + currentTimeMillis)
+        result := (*px + currentTimeMillis)
+        expirationTime = &result
     }
-    return redisValue{content: value, expiration: &expirationTime}
+    return redisValue{content: value, expiration: expirationTime}
 }
 
 func (rv redisValue) isExpired() bool {
