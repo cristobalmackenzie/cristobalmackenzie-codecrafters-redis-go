@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -31,24 +33,54 @@ func handleConnection(conn net.Conn) {
 
 	reader := bufio.NewReader(conn)
 	for {
-		_, err := reader.ReadString('\n')
+		command, params, err := readCommand(reader)
+
 		if err != nil {
 			fmt.Println("Error reading from connection:", err.Error())
 			return
 		}
-
-		_, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error reading from connection:", err.Error())
-			return
+		if command == "ping" {
+			conn.Write([]byte("+PONG\r\n"))
+		} else if command == "echo" {
+			output := fmt.Sprintf("+%s\r\n", params[0])
+			conn.Write([]byte(output))
 		}
-
-		_, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error reading from connection:", err.Error())
-			return
-		}
-
-		conn.Write([]byte("+PONG\r\n"))
 	}
+}
+
+func readCommand(reader *bufio.Reader) (string, [](string), error) {
+	// *2, number of parameters
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return "", [](string){}, err
+	}
+	numParams := parseNumParams(line)
+
+	params := [](string){}
+	for i := 0; i < numParams; i++ {
+		// $4, length of param
+		_, err = reader.ReadString('\n')
+		if err != nil {
+			return "", [](string){}, err
+		}
+
+		// param itself
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			return "", [](string){}, err
+		}
+		params = append(params, strings.TrimSuffix(line, "\r\n"))
+	}
+	return params[0], params[1:], nil
+}
+
+
+func parseNumParams(inputStr string) int {
+	line := strings.TrimPrefix(inputStr, "*")
+	line = strings.TrimSuffix(line, "\r\n")
+	numParams, err := strconv.Atoi(line)
+	if err != nil {
+		panic("Couldn't parse number of parameters")
+	}
+	return numParams
 }
