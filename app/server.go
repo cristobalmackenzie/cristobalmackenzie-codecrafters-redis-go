@@ -39,6 +39,7 @@ func handleConnection(conn net.Conn, rs *RedisStore) {
 	reader := bufio.NewReader(conn)
 	for {
 		command, params, err := readCommand(reader)
+		fmt.Println(command, params, err)
 
 		if err != nil {
 			// fmt.Println("Error reading from command:", err.Error())
